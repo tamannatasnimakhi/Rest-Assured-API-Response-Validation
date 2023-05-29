@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testng-results ignored="1" total="2" passed="1" failed="0" skipped="0">
+  <reporter-output>
+  </reporter-output>
+  <suite started-at="2023-05-29T09:36:48 BDT" name="Default suite" finished-at="2023-05-29T09:36:51 BDT" duration-ms="2732">
+    <groups>
+    </groups>
+    <test started-at="2023-05-29T09:36:48 BDT" name="Default test" finished-at="2023-05-29T09:36:51 BDT" duration-ms="2732">
+      <class name="operationAboutUser.UserOperation">
+        <test-method signature="getUserByUserName()[pri:0, instance:operationAboutUser.UserOperation@1afd44cb]" started-at="2023-05-29T09:36:48 BDT" name="getUserByUserName" finished-at="2023-05-29T09:36:51 BDT" duration-ms="2713" status="PASS">
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- getUserByUserName -->
+      </class> <!-- operationAboutUser.UserOperation -->
+    </test> <!-- Default test -->
+  </suite> <!-- Default suite -->
+</testng-results>
