@@ -576,6 +576,45 @@ public class userOperations {
 
 
     }
+
+    @Test
+    public void logsOutFromUserSession(){
+        Response response =
+                        when().
+                        get(BASE_URL +"/user/logout").
+                        then().
+                        assertThat().
+                        statusCode(200).
+                        log().all().extract().response();
+
+//        {
+//            "code": 200,
+//                "type": "unknown",
+//                "message": "ok"
+//        }
+
+        ValidatableResponse validatableResponse = response.then();
+        //are there 3 keys such as "code", "type" and "message"?
+        validatableResponse.body("$", hasKey("code"));
+        validatableResponse.body("$", hasKey("type"));
+        validatableResponse.body("$", hasKey("message"));
+
+        //Are there 3 values for 3 keys?
+        validatableResponse.body("code", is(notNullValue()));
+        validatableResponse.body("type", is(notNullValue()));
+        validatableResponse.body("message", is(notNullValue()));
+
+        JsonPath jsonPathEvaluator = response.jsonPath();
+
+        //Are the values for the particular keys are matching or valid?
+        assertEquals((Integer)jsonPathEvaluator.get("code"), 200);
+        assertEquals(jsonPathEvaluator.get("type"), "unknown");
+        assertEquals(jsonPathEvaluator.get("message"), "ok");
+
+
+    }
+
+
     // Key-Value pair
     // Key --> String
     // "email": "tamanna.tasnim.akhi@gmail.com",
