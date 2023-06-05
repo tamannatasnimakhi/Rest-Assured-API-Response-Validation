@@ -33,7 +33,7 @@ public class userOperations {
     public static final String UPDATED_EMAIL = "akhi.pojf@gmail.com";
     public static final String UPDATED_PASSWORD = "chayan1@4chayan1@4";
 
-    @Test(priority = 0)
+    @Test(priority = 1)
 
     public void createAnUser() {
 
@@ -97,7 +97,7 @@ public class userOperations {
         //through response variable, validating the response in three more steps end
     }
 
-    @Test (priority = 1)
+    @Test (priority = 2)
     public void getUserByUserName() {
 
 //		{
@@ -158,7 +158,7 @@ public class userOperations {
 
 
     }
-    @Test (priority = 2)
+    @Test (priority = 3)
     public void updateAnUser() {
 
         //mapping start
@@ -219,7 +219,7 @@ public class userOperations {
 
     }
 
-    @Test (priority = 3)
+    @Test (priority = 4)
     public void getUpdatedUserByUserName() {
         // {
         // "id": 9223372036854747349,
@@ -278,7 +278,7 @@ public class userOperations {
 
 
     }
-    @Test (priority = 4  )
+    @Test(priority = 5)
     public void deleteUser() {
         Response response =  given().
                 pathParam("username", USER_NAME).
@@ -315,7 +315,7 @@ public class userOperations {
         assertEquals(jsonPathEvaluator.get("message"), USER_NAME);
         //through response variable, validating the response in three more steps end
     }
-    @Test
+    @Test(priority = 6)
     public void createListOfUsersUsingArray() {
 //		[
 //		    {
@@ -425,7 +425,7 @@ public class userOperations {
 
     }
 
-    @Test
+    @Test(priority = 7)
     public void createListOfUsersUsingList() {
 //		[
 //		    {
@@ -531,6 +531,48 @@ public class userOperations {
         assertEquals(jsonPathEvaluator.get("type"), "unknown");
         assertEquals(jsonPathEvaluator.get("message"), "ok");
 
+
+
+    }
+    @Test
+    public void logsUserIntoTheSystem(){
+        Response response =
+        given().
+                queryParam("username", USER_NAME).
+                queryParam("password", UPDATED_PASSWORD).
+        when().
+                get(BASE_URL +"/user/login").
+        then().
+                assertThat().
+                statusCode(200).
+                log().all().extract().response();
+
+//        {
+//            "code": 200,
+//                "type": "unknown",
+//                "message": "logged in user session:1685946458894"
+//        }
+
+        ValidatableResponse validatableResponse = response.then();
+        //are there 3 keys such as "code", "type" and "message"?
+        validatableResponse.body("$", hasKey("code"));
+        validatableResponse.body("$", hasKey("type"));
+        validatableResponse.body("$", hasKey("message"));
+
+        //Are there 3 values for 3 keys?
+        validatableResponse.body("code", is(notNullValue()));
+        validatableResponse.body("type", is(notNullValue()));
+        validatableResponse.body("message", is(notNullValue()));
+
+        JsonPath jsonPathEvaluator = response.jsonPath();
+
+        //Are the values for the particular keys are matching or valid?
+        assertEquals((Integer)jsonPathEvaluator.get("code"), 200);
+        assertEquals(jsonPathEvaluator.get("type"), "unknown");
+
+        //we are returning the value of "message" key ------->
+        String valueOfMessage =   jsonPathEvaluator.get("message");
+        assertEquals(true, valueOfMessage.contains("logged in user session"));
 
 
     }
