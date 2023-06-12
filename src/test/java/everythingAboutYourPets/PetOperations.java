@@ -30,6 +30,8 @@ public class PetOperations {
     public static int thirdTagId = 302;
     public static String thirdTagName = "Pretty Dog";
     public static String petStatus = "available";
+    public static String updatedCategoryName = "White";
+    public static String updatedPetName = "Montu";
 
     @Test
     public void createANewPetToTheStore() {
@@ -212,5 +214,125 @@ public class PetOperations {
 
         assertEquals(jsonPathEvaluator.get("status"), petStatus);
     }
+@Test
+    public void updateAnExistingPet() {
 
+//    {
+//        "id": 100,
+//            "category": {
+//        "id": 200,
+//                "name": "White"
+//    },
+//        "name": "Montu",
+//            "photoUrls": [
+//        "E:\\black dog 1.jpg",
+//                "E:\\black dog 2.jpg",
+//                "E:\\black dog 3.jpg"
+//    ],
+//        "tags": [
+//        {
+//            "id": 300,
+//                "name": "Black Shephard"
+//        },
+//        {
+//            "id": 301,
+//                "name": "Beautiful Dog"
+//        },
+//        {
+//            "id": 302,
+//                "name": "Pretty Dog"
+//        }
+//    ],
+//        "status": "available"
+//    }
+    Map<String, Object> categoryValuePayload = new HashMap<String, Object>();
+    categoryValuePayload.put("id", categoryId);
+    categoryValuePayload.put("name", updatedCategoryName);
+
+    Map<String, Object> tagsPayloadForFirstObject = new HashMap<String, Object>();
+    tagsPayloadForFirstObject.put("id", firstTagId);
+    tagsPayloadForFirstObject.put("name", firstTagName);
+
+    Map<String, Object> tagsPayloadForSecondObject = new HashMap<String, Object>();
+    tagsPayloadForSecondObject.put("id", secondTagId);
+    tagsPayloadForSecondObject.put("name", secondTagName);
+
+    Map<String, Object> tagsPayloadForThirdObject = new HashMap<String, Object>();
+    tagsPayloadForThirdObject.put("id", thirdTagId);
+    tagsPayloadForThirdObject.put("name", thirdTagName);
+
+    List<Map<String, Object>> tagsPayload = new ArrayList<Map<String, Object>>();
+    tagsPayload.add(tagsPayloadForFirstObject);
+    tagsPayload.add(tagsPayloadForSecondObject);
+    tagsPayload.add(tagsPayloadForThirdObject);
+
+
+
+    Map<String, Object> requestBodyPayload = new HashMap<String, Object>();
+    requestBodyPayload.put("id", id);
+    requestBodyPayload.put("category", categoryValuePayload);
+    requestBodyPayload.put("name", updatedPetName);
+    requestBodyPayload.put("photoUrls", Arrays.asList(firstPhoto, secondPhoto,thirdPhoto));
+    requestBodyPayload.put("tags", tagsPayload);
+    requestBodyPayload.put("status", petStatus);
+
+    JSONObject payload = new JSONObject(requestBodyPayload);
+
+    System.out.println(payload);
+
+    Response response = given().
+            body(payload.toJSONString()).
+            contentType("application/json").
+            when().
+            put(BASE_URL + "/pet").
+            then().
+            assertThat().
+            statusCode(200).
+            log().all().extract().response();
+
+    ValidatableResponse validatableResponse = response.then();
+
+    //are there 6 keys such as "id", "category"
+    // "name", "photoUrls", "tags", and "status"?
+    validatableResponse.body("$", hasKey("id"));
+    validatableResponse.body("$", hasKey("category"));
+    validatableResponse.body("$", hasKey("name"));
+    validatableResponse.body("$", hasKey("photoUrls"));
+    validatableResponse.body("$", hasKey("tags"));
+    validatableResponse.body("$", hasKey("status"));
+
+
+    //Are there 6 values for 6 keys?
+    validatableResponse.body("id", is(notNullValue()));
+    validatableResponse.body("category", is(notNullValue()));
+    validatableResponse.body("name", is(notNullValue()));
+    validatableResponse.body("photoUrls", is(notNullValue()));
+    validatableResponse.body("tags", is(notNullValue()));
+    validatableResponse.body("status", is(notNullValue()));
+
+    JsonPath jsonPathEvaluator = response.jsonPath();
+
+    //Are the values for the particular keys are matching or valid?
+    assertEquals((Integer) jsonPathEvaluator.get("id"), id);
+
+    assertEquals((Integer) jsonPathEvaluator.get("category.id"), categoryId);
+    assertEquals(jsonPathEvaluator.get("category.name"), updatedCategoryName);
+
+    assertEquals(jsonPathEvaluator.get("name"), updatedPetName);
+
+    assertEquals(jsonPathEvaluator.get("photoUrls[0]"), firstPhoto);
+    assertEquals(jsonPathEvaluator.get("photoUrls[1]"), secondPhoto);
+    assertEquals(jsonPathEvaluator.get("photoUrls[2]"), thirdPhoto);
+
+    assertEquals((Integer)jsonPathEvaluator.get("tags[0].id"), firstTagId);
+    assertEquals(jsonPathEvaluator.get("tags[0].name"), firstTagName);
+
+    assertEquals((Integer)jsonPathEvaluator.get("tags[1].id"), secondTagId);
+    assertEquals(jsonPathEvaluator.get("tags[1].name"), secondTagName);
+
+    assertEquals((Integer)jsonPathEvaluator.get("tags[2].id"), thirdTagId);
+    assertEquals(jsonPathEvaluator.get("tags[2].name"), thirdTagName);
+
+    assertEquals(jsonPathEvaluator.get("status"), petStatus);
+    }
 }
