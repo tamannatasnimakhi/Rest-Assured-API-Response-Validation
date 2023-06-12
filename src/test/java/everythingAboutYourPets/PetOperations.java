@@ -5,6 +5,9 @@ import static io.restassured.RestAssured.*;
 import static org.hamcrest.Matchers.*;
 import static org.testng.Assert.assertEquals;
 
+import io.restassured.config.EncoderConfig;
+import io.restassured.config.RestAssuredConfig;
+import io.restassured.http.ContentType;
 import io.restassured.path.json.JsonPath;
 import io.restassured.response.Response;
 import io.restassured.response.ValidatableResponse;
@@ -390,5 +393,54 @@ public class PetOperations {
         assertEquals(jsonPathEvaluator.get("tags[2].name"), thirdTagName);
 
         assertEquals(jsonPathEvaluator.get("status"), petStatus);
+    }
+
+    @Test
+    public void updateAPetToTheStoreWithFormData(){
+
+        Response response =
+        given().
+                pathParam("petId",id).
+                formParam("name", "Tommy").
+                formParam("status", "sold").
+                config(RestAssuredConfig.config().
+        //as we are providing a "header" for "formParam" that's why we
+        //need to configure so that we are using ".config"
+                encoderConfig(EncoderConfig.encoderConfig().
+                encodeContentTypeAs("multipart/form-data", ContentType.TEXT))).
+        when().
+                post(BASE_URL + "/pet/{petId}").
+        then().
+                assertThat().
+                statusCode(200).
+                log().all().extract().response();
+
+
+        //        {
+//            "code": 200,
+//                "type": "unknown",
+//                "message": "100"
+//        }
+
+        //are there 3 keys such as "code", "type", "message",
+
+        ValidatableResponse validatableResponse = response.then();
+        validatableResponse.body("$", hasKey("code"));
+        validatableResponse.body("$", hasKey("type"));
+        validatableResponse.body("$", hasKey("message"));
+
+
+        //Are there 3 values for 3 keys?
+        validatableResponse.body("code", is(notNullValue()));
+        validatableResponse.body("type", is(notNullValue()));
+        validatableResponse.body("message", is(notNullValue()));
+
+
+        JsonPath jsonPathEvaluator = response.jsonPath();
+
+        //Are the values for the particular keys are matching or valid?
+        assertEquals((Integer)jsonPathEvaluator.get("code"), 200);
+        assertEquals(jsonPathEvaluator.get("type"), "unknown");
+        assertEquals(jsonPathEvaluator.get("message"), Integer.toString(id));
     }
 }
