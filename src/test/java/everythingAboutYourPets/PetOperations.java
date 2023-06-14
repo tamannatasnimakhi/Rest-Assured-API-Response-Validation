@@ -4,6 +4,7 @@ import com.google.gson.JsonObject;
 import static io.restassured.RestAssured.*;
 import static org.hamcrest.Matchers.*;
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertTrue;
 
 import io.restassured.config.EncoderConfig;
 import io.restassured.config.RestAssuredConfig;
@@ -15,6 +16,7 @@ import org.json.simple.JSONObject;
 import org.testng.annotations.Test;
 
 import javax.sound.midi.Soundbank;
+import java.io.File;
 import java.util.*;
 
 public class PetOperations {
@@ -35,6 +37,8 @@ public class PetOperations {
     public static String petStatus = "available";
     public static String updatedCategoryName = "White";
     public static String updatedPetName = "Montu";
+    public static String imagePath = "E:\\black dog 1 - Copy.jpg";
+    public static String metadata = "I uploaded image for " + id;
 
     @Test
     public void createANewPetToTheStore() {
@@ -403,9 +407,10 @@ public class PetOperations {
                 pathParam("petId",id).
                 formParam("name", "Tommy").
                 formParam("status", "sold").
-                config(RestAssuredConfig.config().
+
         //as we are providing a "header" for "formParam" that's why we
-        //need to configure so that we are using ".config"
+        //need to configure through".config"
+                config(RestAssuredConfig.config().
                 encoderConfig(EncoderConfig.encoderConfig().
                 encodeContentTypeAs("multipart/form-data", ContentType.TEXT))).
         when().
@@ -442,5 +447,63 @@ public class PetOperations {
         assertEquals((Integer)jsonPathEvaluator.get("code"), 200);
         assertEquals(jsonPathEvaluator.get("type"), "unknown");
         assertEquals(jsonPathEvaluator.get("message"), Integer.toString(id));
+    }
+
+    @Test
+    public void uploadImage(){
+
+
+//        given().
+//                pathParam("petId", id).
+//                formParam("additionalMetadata", "I uploaded image for 100").
+//                formParam("file", new File("E:/black dog 1 - Copy")).
+//                config(RestAssuredConfig.config().
+//                encoderConfig(EncoderConfig.
+//                encoderConfig().
+//                encodeContentTypeAs("multipart/form-data", ContentType.ANY))).
+//        when().
+//                post(BASE_URL + "/pet/{petId}/uploadImage").
+//        then().
+//                assertThat().statusCode(200);
+
+        Response response =
+        given().
+                pathParam("petId", id).
+                multiPart("file", new File(imagePath)).
+                multiPart("additionalMetadata", metadata).
+        when().
+                post(BASE_URL + "/pet/{petId}/uploadImage").
+        then().
+                assertThat().statusCode(200).
+                log().all().extract().response();
+
+        //        {
+//            "code": 200,
+//                "type": "unknown",
+//                "message":
+//                "additionalMetadata: I uploaded image for 100\nFile uploaded to ./SampleJPGImage_2mbmb.jpg, 2101546 bytes"
+//        }
+
+        ValidatableResponse validatableResponse = response.then();
+        validatableResponse.body("$", hasKey("code"));
+        validatableResponse.body("$", hasKey("type"));
+        validatableResponse.body("$", hasKey("message"));
+
+
+        //Are there 3 values for 3 keys?
+        validatableResponse.body("code", is(notNullValue()));
+        validatableResponse.body("type", is(notNullValue()));
+        validatableResponse.body("message", is(notNullValue()));
+
+
+        JsonPath jsonPathEvaluator = response.jsonPath();
+
+        //Are the values for the particular keys are matching or valid?
+        assertEquals((Integer)jsonPathEvaluator.get("code"), 200);
+        assertEquals(jsonPathEvaluator.get("type"), "unknown");
+
+        String actualValueOfMessage = jsonPathEvaluator.get("message");
+
+        assertTrue(actualValueOfMessage. contains(metadata + "\\nFile uploaded to" + imagePath));
     }
 }
