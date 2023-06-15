@@ -509,12 +509,8 @@ public class PetOperations {
     }
     @Test
     public void deleteAPet(){
-//        {
-//            "code": 200,
-//                "type": "unknown",
-//                "message": "100"
-//        }
-        given().
+
+        Response response = given().
                 pathParam("petId", id).
                 auth().
                 oauth2("special-key", OAuthSignature.HEADER).
@@ -524,6 +520,33 @@ public class PetOperations {
                 assertThat().
                 statusCode(200).
                 log().all().extract().response();
+
+        //        {
+//            "code": 200,
+//                "type": "unknown",
+//                "message": "100"
+//        }
+
+        //are there 3 keys such as "code", "type", "message",
+
+        ValidatableResponse validatableResponse = response.then();
+        validatableResponse.body("$", hasKey("code"));
+        validatableResponse.body("$", hasKey("type"));
+        validatableResponse.body("$", hasKey("message"));
+
+
+        //Are there 3 values for 3 keys?
+        validatableResponse.body("code", is(notNullValue()));
+        validatableResponse.body("type", is(notNullValue()));
+        validatableResponse.body("message", is(notNullValue()));
+
+
+        JsonPath jsonPathEvaluator = response.jsonPath();
+
+        //Are the values for the particular keys are matching or valid?
+        assertEquals((Integer)jsonPathEvaluator.get("code"), 200);
+        assertEquals(jsonPathEvaluator.get("type"), "unknown");
+        assertEquals(jsonPathEvaluator.get("message"), Integer.toString(id));
 
     }
 }
