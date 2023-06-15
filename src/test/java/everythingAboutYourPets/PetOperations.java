@@ -6,6 +6,7 @@ import static org.hamcrest.Matchers.*;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
+import io.restassured.authentication.OAuthSignature;
 import io.restassured.config.EncoderConfig;
 import io.restassured.config.RestAssuredConfig;
 import io.restassured.http.ContentType;
@@ -503,7 +504,26 @@ public class PetOperations {
         assertEquals(jsonPathEvaluator.get("type"), "unknown");
 
         String actualValueOfMessage = jsonPathEvaluator.get("message");
-        System.out.println("additionalMetadata: " + metadata + "\\nFile uploaded to ." + imagePath.substring(2));
-        //assertTrue(actualValueOfMessage. contains(metadata + "\\nFile uploaded to" + imagePath));
+        //System.out.println("additionalMetadata: " + metadata + "\\nFile uploaded to ."); // + imagePath.substring(2)
+        assertTrue(actualValueOfMessage. contains("additionalMetadata: " + metadata + "\nFile uploaded to ."));
+    }
+    @Test
+    public void deleteAPet(){
+//        {
+//            "code": 200,
+//                "type": "unknown",
+//                "message": "100"
+//        }
+        given().
+                pathParam("petId", id).
+                auth().
+                oauth2("special-key", OAuthSignature.HEADER).
+        when().
+                delete(BASE_URL + "/pet/{petId}").
+        then().
+                assertThat().
+                statusCode(200).
+                log().all().extract().response();
+
     }
 }
