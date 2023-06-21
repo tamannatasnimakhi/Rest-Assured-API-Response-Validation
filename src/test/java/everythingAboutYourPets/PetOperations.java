@@ -12,6 +12,7 @@ import io.restassured.config.RestAssuredConfig;
 import io.restassured.http.ContentType;
 import io.restassured.path.json.JsonPath;
 import io.restassured.response.Response;
+import io.restassured.response.ResponseBody;
 import io.restassured.response.ValidatableResponse;
 import org.json.simple.JSONObject;
 import org.testng.annotations.Test;
@@ -547,6 +548,51 @@ public class PetOperations {
         assertEquals((Integer)jsonPathEvaluator.get("code"), 200);
         assertEquals(jsonPathEvaluator.get("type"), "unknown");
         assertEquals(jsonPathEvaluator.get("message"), Integer.toString(id));
+
+    }
+    @Test
+    public void findPetsByStatus(){
+        /* I have an array of 10 objects
+        Array have indexes, Array index starts from 0th position
+        1st object stored in 0th position
+        ......
+        .......
+        10th object stored in 9th position
+        10 objects have 10 ids
+        we will add those ids in a list --> list is a container
+        we check our target id from that list
+        if the target id is found, then we will get
+        other information of target pet
+         */
+
+    Response response =
+    given().
+            queryParam("status", "sold").
+    when().
+            get(BASE_URL + "/pet/findByStatus").
+    then().
+            assertThat().
+            statusCode(200).
+            log().all().extract().response();
+
+    List<Long> listOfId = new ArrayList<Long>();
+    listOfId = JsonPath.from(response.getBody().asString()).get("id");
+        System.out.println(listOfId);
+    //Response<ResponseBody<>> res = response.getBody();
+    //JsonPath.from(response.getBody());
+
+//  how foreach works=      for (temporary variable : list) {
+//            if (variable == 100){
+//                System.out.println("Found the expected one");
+//            }
+//        }
+        for (Object singleId : listOfId) {
+           if (singleId == (Object) 100){
+               System.out.println("Found the target pet");
+           }
+       }
+
+
 
     }
 }
