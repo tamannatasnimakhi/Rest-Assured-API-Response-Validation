@@ -588,7 +588,8 @@ public class PetOperations {
 //        }
         for (Object singleId : listOfId) {
            if (singleId == (Object) 100){
-               System.out.println("Found the target pet");
+               //System.out.println("Found the target pet");
+               assertEquals(singleId, 100);
            }
        }
 
