@@ -577,7 +577,7 @@ public class PetOperations {
 
     List<Long> listOfId = new ArrayList<Long>();
     listOfId = JsonPath.from(response.getBody().asString()).get("id");
-        System.out.println(listOfId);
+    System.out.println(listOfId);
     //Response<ResponseBody<>> res = response.getBody();
     //JsonPath.from(response.getBody());
 
@@ -586,6 +586,15 @@ public class PetOperations {
 //                System.out.println("Found the expected one");
 //            }
 //        }
+        List<Long> listOfCategoryId = new ArrayList<Long>();
+        listOfCategoryId = JsonPath.from(response.getBody().asString()).get("category.id");
+        System.out.println(listOfCategoryId);
+
+        List<Long> listOfCategoryName = new ArrayList<Long>();
+        listOfCategoryName = JsonPath.from(response.getBody().asString()).get("category.name");
+        System.out.println(listOfCategoryName);
+
+
         for (Object singleId : listOfId) {
            if (singleId == (Object) 100){
                //System.out.println("Found the target pet");
